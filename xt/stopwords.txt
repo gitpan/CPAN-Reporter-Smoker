@@ -1,0 +1,16 @@
+CPAN
+CTRL
+DAGOLDEN
+MSWin
+README
+STDERR
+STDOUT
+XS
+cpanreporter
+html
+minicpan
+minicpanrc
+reptitively
+skipfile
+skipfiles
+untarring
