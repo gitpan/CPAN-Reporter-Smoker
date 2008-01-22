@@ -2,11 +2,12 @@ package CPAN::Reporter::Smoker;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.01_01'; 
+our $VERSION = '0.01_02'; 
 $VERSION = eval $VERSION; ## no critic
 
 use Config;
 use CPAN; 
+use CPAN::Tarzip;
 use CPAN::HandleConfig;
 use CPAN::Reporter::History;
 use File::Temp 0.20;
@@ -22,7 +23,7 @@ our @EXPORT = qw/ start /; ## no critic Export
 #--------------------------------------------------------------------------#
 
 my $perl = Probe::Perl->find_perl_interpreter;
-my $module_file = 'modules/01modules.index.html';
+my $index_file = 'indices/find-ls.gz';
 my $tmp_dir = File::Temp->newdir( 'CPAN-Reporter-Smoker-XXXXXXX', 
     DIR => File::Spec->tmpdir,
 );
@@ -46,11 +47,15 @@ sub start {
     CPAN::Index->reload;
 
     # Get the list of distributions to process
-    my $index = _get_module_index()
-        or die "Couldn't get '$module_file' from your CPAN mirror. Halting\n";
+    $CPAN::Frontend->mywarn( 
+        "Smoker: getting index from CPAN\n");
+    my $index = _get_module_index( $index_file )
+        or die "Couldn't get '$index_file' from your CPAN mirror. Halting\n";
+    $CPAN::Frontend->mywarn( 
+        "Smoker: scanning and sorting index\n");
     my $dists = _parse_module_index( $index );
     
-    # Win32 SIGINT propogates all the way to us, so trap it
+    # Win32 SIGINT propogates all the way to us, so trap it before we smoke
     local $SIG{INT} = \&_prompt_quit;
 
     # Start smoking
@@ -97,6 +102,25 @@ my %months = (
     Nov => '11', Dec => '12'
 );
 
+# standard regexes
+my %re = (
+    perls => qr{[^/]+/(?:perl|parrot|kurila|ponie)-?\d},
+    archive => qr{\.(?:tar\.(?:bz2|gz|Z)|t(?:gz|bz)|zip)$}i,
+    target_dir => qr{
+        ^(?:
+            modules/by-module/[^/]+/ | 
+            modules/by-category/[^/]+/ | 
+            authors/id/./../
+        )
+    }x,
+);
+
+# split into "AUTHOR/Name" and "Version"
+$re{split_them} = qr{^(.+)-([^-]+)$re{archive}$};
+
+# matches "AUTHOR/tarbal.suffix" and not "AUTHOR/subdir/whatever"
+$re{get_base_id} = qr{$re{target_dir}([^/]+/[^/]+)$};
+
 #--------------------------------------------------------------------------#
 # _get_module_index
 #
@@ -104,8 +128,9 @@ my %months = (
 #--------------------------------------------------------------------------#
 
 sub _get_module_index {
-    my $local_file = File::Spec->catfile( $tmp_dir, 'module_index' );
-    return CPAN::FTP->localize( $module_file, $local_file ); 
+    my ($remote_file) = @_;
+    my $local_file = File::Spec->catfile( $tmp_dir, $remote_file );
+    return CPAN::FTP->localize( $remote_file, $local_file ); 
 }
 
 #--------------------------------------------------------------------------#
@@ -116,26 +141,52 @@ sub _get_module_index {
 
 sub _parse_module_index {
     my ($filename) = @_;
-    my $fh = IO::File->new( $filename );
 
-    INTRO:
-    while ( my $line = <$fh> ) {
-        chomp $line;
-        if ( $line =~ /^<pre>/ ) {
-            # skip 3 more lines
-            <$fh> for 0 .. 2;
-            last INTRO;
+    local *FH;
+    tie *FH, 'CPAN::Tarzip', $filename;
+
+    my %latest;
+    my %latest_dev;
+
+    while ( defined ( my $line = <FH> ) ) {
+        my %stat;
+        @stat{qw/inode blocks perms links owner group size datetime name linkname/}
+            = split q{ }, $line;
+        
+        # skip directories, symlinks and things that aren't a tarball
+        next if $stat{perms} eq "l" || substr($stat{perms},0,1) eq "d";
+        next unless $stat{name} =~ $re{target_dir};
+        next unless $stat{name} =~ $re{archive};
+
+        # skip if not AUTHOR/tarball 
+        # skip perls
+        my ($base_id) = $stat{name} =~ $re{get_base_id};
+        next unless $base_id; 
+        next if $base_id =~ $re{perls};
+
+        # split into "AUTHOR/Name" and "Version"
+        # skip if doesn't dist doesn't have a proper version number
+        my ($base_dist, $base_version) = $base_id =~ $re{split_them};
+        next unless defined $base_dist && defined $base_version; 
+
+        # record developer and regular releases separately
+        my $tracker = ( $base_version =~ m{_} ) ? \%latest_dev : \%latest;
+
+        $tracker->{$base_dist} ||= { datetime => 0 };
+        if ( $stat{datetime} > $tracker->{$base_dist}{datetime} ) {
+            $tracker->{$base_dist} = { 
+                datetime => $stat{datetime}, 
+                base_id => $base_id
+            };
         }
     }
 
+    # assemble into one set
     my %dists;
-    while ( my $line = <$fh> ) {
-        next unless substr($line,0,1) eq q{ }; # unless starts with space
-        my ($dist,$day,$month,$year) = $line =~ $module_index_re;
-        next unless $dist;
-        $dists{$dist} = $year . $months{$month} . $day;
+    for my $tracker ( \%latest, \%latest_dev ) {
+        $dists{ $tracker->{$_}{base_id} } = $tracker->{$_}{datetime} 
+            for keys %$tracker;
     }
-
     return [ sort { $dists{$b} <=> $dists{$a} } keys %dists ];
 }
 
@@ -186,7 +237,7 @@ instead it uses configuration settings from CPAN.pm and CPAN::Reporter.
 
 Once started, it retrieves a list of distributions from the configured CPAN
 mirror and begins testing them in reverse order of upload.  It will skip any
-distribution which has already had a report sent by CPAN::Reporter.
+distribution which has already had a report sent by CPAN::Reporter.  
 
 Features (or bugs, depending on your point of view):
 
@@ -197,7 +248,6 @@ has prerequisites like build_requires satisfied from scratch
 
 Current limitations:
 
-* Does not test developer/alpha versions of distributions
 * Doesn't check skip files before handing off to CPAN to test
 * Does not check for new distributions to test while running, only when
 starting up
@@ -213,6 +263,20 @@ take these risks.
 
 = HINTS
 
+== Selection of distributions to test
+
+Note that only the most recently uploaded developer and normal releases will be
+tested.  In otherwords, if Foo-Bar-0.01, Foo-Bar-0.02, Foo-Bar-0.03_01 and
+Foo-Bar-0.03_02 are on CPAN, only Foo-Bar-0.02 and Foo-Bar 0.03_02 will be
+tested, and in reverse order of when they were uploaded.
+
+Perl, parrot or kurila distributions will not be tested.  
+
+Also, anything that doesn't appear to be a "normal" distribution will not be
+tested.  To be in the queue for smoke testing, distributions must be in an
+author's base CPAN directory with an archive suffix and a sensible version
+number.
+
 == CPAN::Mini
 
 Because distributions must be retrieved from a CPAN mirror, the smoker may
@@ -226,19 +290,18 @@ point CPAN's {urllist} to the local mirror.
     cpan> o conf urllist unshift file:///path/to/minicpan
     cpan> o conf commit
 
-However, CPAN::Reporter::Smoker needs the 01modules.index.html file, which
+However, CPAN::Reporter::Smoker needs the {find-ls.gz} file, which
 CPAN::Mini does not mirror by default.  Add it to a .minicpanrc file in your
 home directory to include it in your local CPAN mirror.
 
-    also_mirror: modules/01modules.index.html
+    also_mirror: indices/find-ls.gz
 
-Note that CPAN::Mini does not mirror developer versions.  When
-CPAN::Reporter::Smoker adds the ability to smoke test developer versions, a
-network CPAN Mirror will be needed in the urllist to retrieve these.
+Note that CPAN::Mini does not mirror developer versions.  Therefore, a
+live, network CPAN Mirror will be needed in the urllist to retrieve these.
 
 == Skip files
 
-CPAN::Reporter (1.07_01 or later) supports skipfiles to prevent copying authors
+CPAN::Reporter (since 1.07_01) supports skipfiles to prevent copying authors
 on reports or from sending reports at all for certain distributions or authors'
 modules.  Use these to stop sending reports if someone complains.  See
 [CPAN::Reporter::Config] for more details.

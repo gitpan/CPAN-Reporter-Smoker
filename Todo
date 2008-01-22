@@ -15,13 +15,6 @@ TODO list for Perl module CPAN::Reporter::Smoker
    - or use own custom one?
    - or use distroprefs?  skip even things in dependencies?
 
-- check recent files as well to pick up new developer versions
-    - parse CPAN/RECENT file for alpha versions and stick them at the 
-      front of the queue
-    - possibly don't put them in the queue if we can tell they've been
-      tested, but this wouldn't be a lazy check the way the rest is, so
-      maybe just skip it
-
 - break out of test loop and recheck for updates after some period of delay
 
 - retest discards after some period of time
@@ -29,7 +22,13 @@ TODO list for Perl module CPAN::Reporter::Smoker
       would need changes to CPAN::Reporter history logging to separately
       log DISCARD with the missing dependencies
 
+- statistics -- show counter of tests for each test run; show total tests 
+  run at the end
+
 # Low/Maybe
+
+- add some process control -- keep a proces ID in a run file and add a stop()
+  commnd to stop a running process.
 
 - try Parse::CPAN::Meta as a way of getting dependencies?
 
