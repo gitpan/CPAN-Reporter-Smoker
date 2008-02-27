@@ -8,7 +8,7 @@ use File::Spec;
 use IO::CaptureOutput qw/capture/;
 use t::DotDirs;
 
-plan tests =>  5 ;
+plan tests =>  6 ;
 
 #--------------------------------------------------------------------------#
 # Setup test environment
@@ -48,14 +48,17 @@ pass ("Starting simulated smoke testing");
 
 local $ENV{PERL_CR_SMOKER_RUNONCE} = 1;
 
+my $rc;
 if ( $ENV{PERL_AUTHOR_TESTING} ) {
-    CPAN::Reporter::Smoker::start();
+    $rc = CPAN::Reporter::Smoker::start( restart_delay => 1 );
 }
 else {
-    capture \&CPAN::Reporter::Smoker::start, \$stdout, \$stderr;
+    $rc = capture { CPAN::Reporter::Smoker::start( restart_delay => 1 ) }
+                  \$stdout, \$stderr;
 }
 
 require_ok( 'CPAN::Reporter::History' );
 my @results = CPAN::Reporter::History::have_tested();
-is( scalar @results, 6, "Number of reports in history" );
+is( scalar @results, 6 , "Number of reports in history" );
+ok( $rc > 1, "Looped more than once due to restart delay" );
 
