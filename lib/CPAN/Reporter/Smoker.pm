@@ -2,7 +2,7 @@ package CPAN::Reporter::Smoker;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.06'; 
+our $VERSION = '0.07'; 
 $VERSION = eval $VERSION; ## no critic
 
 use Carp;
@@ -16,6 +16,7 @@ use File::Temp 0.20;
 use File::Spec;
 use File::Basename qw/basename/;
 use Probe::Perl;
+use Term::Title;
 
 use Exporter;
 our @ISA = 'Exporter';
@@ -66,6 +67,9 @@ sub start {
     # Always accept default prompts
     local $ENV{PERL_MM_USE_DEFAULT} = 1;
 
+    # Win32 SIGINT propogates all the way to us, so trap it before we smoke
+    local $SIG{INT} = \&_prompt_quit;
+
     # Load CPAN configuration
     my $init_cpan = 0;
     unless ( $init_cpan++ ) {
@@ -74,9 +78,6 @@ sub start {
         CPAN::Index->reload;
         $CPAN::META->checklock(); # needed for cache scanning
     }
-
-    # Win32 SIGINT propogates all the way to us, so trap it before we smoke
-    local $SIG{INT} = \&_prompt_quit;
 
     # Master loop
     # loop counter will increment with each restart - useful for testing
@@ -89,6 +90,7 @@ sub start {
         # Get the list of distributions to process
         my $package = _get_module_index( 'modules/02packages.details.txt.gz' );
         my $find_ls = _get_module_index( 'indices/find-ls.gz' );
+        CPAN::Index->reload;
         $CPAN::Frontend->mywarn( "Smoker: scanning and sorting index\n");
 
         my $dists = _parse_module_index( $package, $find_ls );
@@ -106,13 +108,17 @@ sub start {
         for my $d ( @$dists ) {
             my $dist = CPAN::Shell->expandany($d);
             my $base = $dist->base_id;
+            local $ENV{PERL_CR_SMOKER_CURRENT} = $base;
             if ( CPAN::Reporter::History::have_tested( dist => $base ) ) {
                 $CPAN::Frontend->mywarn( 
                     "Smoker: already tested $base\n");
                 next DIST;
             }
             else {
-                $CPAN::Frontend->mywarn( "Smoker: testing $base\n\n" );
+                my $time = scalar localtime();
+                my $msg = "$base [ $time ]";
+                Term::Title::set_titlebar( "Smoking $msg" );
+                $CPAN::Frontend->mywarn( "\nSmoker: testing $msg\n\n" );
                 system($perl, "-MCPAN", "-e", "local \$CPAN::Config->{test_report} = 1; test( '$d' )");
                 _prompt_quit( $? & 127 ) if ( $? & 127 );
             }
@@ -138,6 +144,9 @@ sub _prompt_quit {
         my @signals = split q{ }, $Config{sig_name};
         $sig = $signals[$sig] || '???';
     }
+    $CPAN::Frontend->myprint( 
+        "\nStopped during $ENV{PERL_CR_SMOKER_CURRENT}.\n" 
+    ) if defined $ENV{PERL_CR_SMOKER_CURRENT};
     $CPAN::Frontend->myprint(
         "\nCPAN testing halted on SIG$sig.  Continue (y/n)? [n]\n"
     );
@@ -529,7 +538,7 @@ to "no" in your CPAN::Reporter config file.
 
     cc_author = no
 
-== CPAN::Mini
+== Using a local CPAN::Mini mirror
 
 Because distributions must be retrieved from a CPAN mirror, the smoker may
 cause heavy network load and will reptitively download common build 
@@ -567,11 +576,42 @@ enough.
 Warning -- on Win32, terminating processes via the command_timeout is equivalent to
 SIGKILL and could cause system instability or later deadlocks
 
+== Avoiding repetitive prerequisite testing
+
+Because CPAN::Reporter::Smoker satisfies all requirements from scratch, common
+dependencies (e.g. Class::Accessor) will be unpacked, built and tested 
+repeatedly.
+
+As of version 1.92_56, CPAN supports the {trust_test_report_history} config
+option.  When set, CPAN will check the last test report for a distribution.
+If one is found, the results of that test are used instead of running tests
+again.
+
+    $ cpan
+    cpan> o conf init trust_test_report_history
+    cpan> o conf commit
+
+== Stopping early if a prerequisite fails
+
+Normally, CPAN.pm continues testing a distribution even if a prequisite fails
+to build or fails testing.  Some distributions may pass their tests even
+without a listed prerequisite, but most just fail (and CPAN::Reporter discards
+failures if prerequisites are not met).
+
+As of version 1.92_57, CPAN supports the {halt_on_failure} config option.
+When set, a prerequisite failure stops further processing.
+
+    $ cpan
+    cpan> o conf init halt_on_failure
+    cpan> o conf commit
+
 == CPAN cache bloat
 
-CPAN will use a lot of scratch space to download, build and test modules.  
-Use CPAN's built-in cache management configuration to let it purge the cache 
-periodically if you don't want to do this manually.
+CPAN will use a lot of scratch space to download, build and test modules.  Use
+CPAN's built-in cache management configuration to let it purge the cache
+periodically if you don't want to do this manually.  When configured, the cache
+will be purged on start and whenever CPAN::Reporter::Smoker checks indices for
+new modules.  See the {restart_delay} option for the {start()} function. 
 
     $ cpan
     cpan> o conf init build_cache scan_cache

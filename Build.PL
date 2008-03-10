@@ -12,6 +12,8 @@ $class->new(
     create_makefile_pl  => 'traditional',
     requires => {
         'perl' => 5.006,
+        'Module::Build' => 0.28,
+        'ExtUtils::MakeMaker' => 6.36,
         'Carp' => 0,
         'Compress::Zlib' => 1.2, 
         'CPAN' => 1.92, 
@@ -21,6 +23,7 @@ $class->new(
         'File::Spec' => 3.27, 
         'File::Temp' => 0.20, 
         'Probe::Perl' => 0.01,
+        'Term::Title' => 0.01,
     },
     build_requires => {
         'Cwd' => 3.27, 
