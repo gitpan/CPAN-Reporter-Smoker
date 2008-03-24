@@ -2,7 +2,7 @@ package CPAN::Reporter::Smoker;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.07'; 
+our $VERSION = '0.08'; 
 $VERSION = eval $VERSION; ## no critic
 
 use Carp;
@@ -67,9 +67,6 @@ sub start {
     # Always accept default prompts
     local $ENV{PERL_MM_USE_DEFAULT} = 1;
 
-    # Win32 SIGINT propogates all the way to us, so trap it before we smoke
-    local $SIG{INT} = \&_prompt_quit;
-
     # Load CPAN configuration
     my $init_cpan = 0;
     unless ( $init_cpan++ ) {
@@ -79,9 +76,14 @@ sub start {
         $CPAN::META->checklock(); # needed for cache scanning
     }
 
+    # Win32 SIGINT propogates all the way to us, so trap it before we smoke
+    # Must come *after* checklock() to override CPAN's $SIG{INT}
+    local $SIG{INT} = \&_prompt_quit;
+
     # Master loop
     # loop counter will increment with each restart - useful for testing
     my $loop_counter = 0;
+    my %seen; # global cache of distros smoked to speed skips on restart
     SCAN_LOOP:
     while ( 1 ) {
         $loop_counter++;
@@ -109,7 +111,9 @@ sub start {
             my $dist = CPAN::Shell->expandany($d);
             my $base = $dist->base_id;
             local $ENV{PERL_CR_SMOKER_CURRENT} = $base;
-            if ( CPAN::Reporter::History::have_tested( dist => $base ) ) {
+            if ( $seen{$base}++ || 
+                 CPAN::Reporter::History::have_tested( dist => $base ) 
+            ) {
                 $CPAN::Frontend->mywarn( 
                     "Smoker: already tested $base\n");
                 next DIST;
@@ -604,6 +608,12 @@ When set, a prerequisite failure stops further processing.
     $ cpan
     cpan> o conf init halt_on_failure
     cpan> o conf commit
+
+However, a disadvantage of halting early is that no DISCARD grade is 
+recorded in the history.  The next time CPAN::Reporter::Smoker runs, the
+distribution will be tested again from scratch.  It may be better to let all
+prerequisites finish so the distribution can fail its test and be flagged
+with DISCARD so it will be skipped in the future.
 
 == CPAN cache bloat
 
