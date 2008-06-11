@@ -2,7 +2,7 @@ package CPAN::Reporter::Smoker;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.12'; 
+our $VERSION = '0.13'; 
 $VERSION = eval $VERSION; ## no critic
 
 use Carp;
@@ -120,7 +120,7 @@ sub start {
         if ( $CPAN::Config->{build_dir_reuse} 
           && $CPAN::META->can('reset_tested') )
         {
-          $reset_string = '$CPAN::META->reset_tested; '
+          $reset_string = 'CPAN::Index->reload; $CPAN::META->reset_tested; '
         }
 
         # Clean cache on start and count dists tested to trigger cache cleanup
