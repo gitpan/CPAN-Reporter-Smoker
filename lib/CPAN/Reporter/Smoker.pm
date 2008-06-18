@@ -2,7 +2,7 @@ package CPAN::Reporter::Smoker;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.13'; 
+our $VERSION = '0.14'; 
 $VERSION = eval $VERSION; ## no critic
 
 use Carp;
@@ -156,7 +156,7 @@ sub start {
                 }
                 # invoke CPAN.pm to test distribution 
                 system($perl, "-MCPAN", "-e", 
-                  "local \$CPAN::Config->{test_report} = 1; " 
+                  "\$CPAN::Config->{test_report} = 1; " 
                   . $reset_string . "test( '$dists->[$d]' )"
                 );
                 _prompt_quit( $? & 127 ) if ( $? & 127 );
