@@ -20,7 +20,7 @@ $class->new(
         'Compress::Zlib' => 1.2, 
         'CPAN' => 1.92, 
         'CPAN::HandleConfig' => 0,
-        'CPAN::Reporter::History' => 1.11,
+        'CPAN::Reporter::History' => 1.17,
         'CPAN::Tarzip' => 0,
         'Exporter' => 0,
         'Fcntl' => 0,
@@ -29,6 +29,7 @@ $class->new(
         'File::Temp' => 0.20, 
         'Probe::Perl' => 0.01,
         'Term::Title' => 0.01,
+        'Test::Reporter' => 1.52,
     },
     build_requires => {
         'Cwd' => 3.27, 
