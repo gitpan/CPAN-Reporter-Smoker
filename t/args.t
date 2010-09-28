@@ -33,6 +33,14 @@ my @good_args = (
         label => "status_file - bare filename",
         args => [ status_file => 'foo.txt' ],
     },
+    {
+        label => "reverse",
+        args => [ 'reverse' => 1 ],
+    },
+    {
+        label => "force_trust",
+        args => [ 'force_trust' => 1 ],
+    },
 );
 
 my @bad_args = (
@@ -67,6 +75,14 @@ my @bad_args = (
     {
         label => "status_file",
         args => [ status_file => 'slakjdflaksjdfkds/foo.txt' ],
+    },
+    {
+        label => "reverse",
+        args => [ 'reverse' => 2 ],
+    },
+    {
+        label => "force_trust",
+        args => [ 'force_trust' => 2 ],
     },
 );
 
