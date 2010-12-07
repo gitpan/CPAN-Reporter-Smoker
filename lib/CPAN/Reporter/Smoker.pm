@@ -1,23 +1,34 @@
-package CPAN::Reporter::Smoker;
+#
+# This file is part of CPAN-Reporter-Smoker
+#
+# This software is Copyright (c) 2010 by David Golden.
+#
+# This is free software, licensed under:
+#
+#   The Apache License, Version 2.0, January 2004
+#
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '0.21';
-$VERSION = eval $VERSION; ## no critic
+package CPAN::Reporter::Smoker;
+BEGIN {
+  $CPAN::Reporter::Smoker::VERSION = '0.22';
+}
+# ABSTRACT: Turnkey CPAN Testers smoking
 
 use Carp;
 use Config;
-use CPAN;
+use CPAN 1.93;
 use CPAN::Tarzip;
 use CPAN::HandleConfig;
-use CPAN::Reporter::History;
-use Compress::Zlib;
+use CPAN::Reporter::History 1.1702;
+use Compress::Zlib 1.2;
 use Fcntl ':flock';
 use File::Basename qw/basename dirname/;
-use File::Spec;
+use File::Spec 3.27;
 use File::Temp 0.20;
-use Probe::Perl;
-use Term::Title;
+use Probe::Perl 0.01;
+use Term::Title 0.01;
 
 use Exporter;
 our @ISA = 'Exporter';
@@ -279,7 +290,7 @@ sub _get_module_index {
         "Smoker: getting $remote_file from CPAN\n");
     # CPAN.pm may not use aslocal if it's a file:// mirror
     my $aslocal_file = File::Spec->catfile( $tmp_dir, basename( $remote_file ));
-    my $actual_local = CPAN::FTP->localize( $remote_file, $aslocal_file );
+    my $actual_local = CPAN::FTP->localize( $remote_file, $aslocal_file, 1 );
     if ( ! -r $actual_local ) {
         die "Couldn't get '$remote_file' from your CPAN mirror. Halting\n";
     }
@@ -483,29 +494,25 @@ sub _parse_module_index {
 
 1; #modules must return true
 
-__END__
 
-#--------------------------------------------------------------------------#
-# pod documentation
-#--------------------------------------------------------------------------#
 
-=begin wikidoc
+=pod
 
-= NAME
+=head1 NAME
 
 CPAN::Reporter::Smoker - Turnkey CPAN Testers smoking
 
-= VERSION
+=head1 VERSION
 
-This documentation describes version %%VERSION%%.
+version 0.22
 
-= SYNOPSIS
+=head1 SYNOPSIS
 
-    $ perl -MCPAN::Reporter::Smoker -e start
+     $ perl -MCPAN::Reporter::Smoker -e start
 
-= DESCRIPTION
+=head1 DESCRIPTION
 
-Rudimentary smoke tester for CPAN Testers, built upon [CPAN::Reporter].  Use
+Rudimentary smoke tester for CPAN Testers, built upon L<CPAN::Reporter>.  Use
 at your own risk.  It requires a recent version of CPAN::Reporter to run.
 
 Currently, CPAN::Reporter::Smoker requires zero independent configuration;
@@ -517,75 +524,126 @@ distribution which has already had a report sent by CPAN::Reporter.
 
 Features (or bugs, depending on your point of view):
 
-* No configuration needed
-* Tests each distribution as a separate CPAN process -- each distribution
+=over
+
+=item *
+
+No configuration needed
+
+=item *
+
+Tests each distribution as a separate CPAN process -- each distribution
 has prerequisites like build_requires satisfied from scratch
-* Automatically checks for new distributions every twelve hours or as
+
+=item *
+
+Automatically checks for new distributions every twelve hours or as
 otherwise specified
-* Continues until interrupted with CTRL-C
-* Checks CPAN.pm "distroprefs" to see if distributions should be skipped
+
+=item *
+
+Continues until interrupted with CTRL-C
+
+=item *
+
+Checks CPAN.pm "distroprefs" to see if distributions should be skipped
 (before handing off to CPAN)
+
+=back
 
 Current limitations:
 
-* Does not attempt to retest distributions that had reports discarded because
+=over
+
+=item *
+
+Does not attempt to retest distributions that had reports discarded because
 of prerequisites that could not be satisfied
 
-== WARNING -- smoke testing is risky
+=back
+
+=head2 WARNING -- smoke testing is risky
 
 Smoke testing will download and run programs that other people have uploaded to
-CPAN.  These programs could do *anything* to your system, including deleting
+CPAN.  These programs could do B<anything> to your system, including deleting
 everything on it.  Do not run CPAN::Reporter::Smoker unless you are prepared to
 take these risks.
 
-= USAGE
+=head1 USAGE
 
-== {start()}
+=head2 C<<< start() >>>
 
 Starts smoke testing using defaults already in CPAN::Config and
 CPAN::Reporter's .cpanreporter directory.  Runs until all distributions are
 tested or the process is halted with CTRL-C or otherwise killed.
 
-{start()} supports several optional arguments:
+C<<< start() >>> supports several optional arguments:
 
-* {clean_cache_after} -- number of distributions that will be tested
+=over
+
+=item *
+
+C<<< clean_cache_after >>> -- number of distributions that will be tested
 before checking to see if the CPAN build cache needs to be cleaned up
 (not including any prerequisites tested). Must be a positive integer.
 Defaults to 100
-* {list} -- if provided, this list of distributions will be tested instead
+
+=item *
+
+C<<< list >>> -- if provided, this list of distributions will be tested instead
 of all of CPAN.  May be a reference to an array of distribution names or may
 be a filename containing one distribution name per line.  Distribution names
-must be of the form 'AUTHOR/Dist-Name-0.00.tar.gz'
-* {restart_delay} -- number of seconds that must elapse before restarting
+must be of the form 'AUTHORE<sol>Dist-Name-0.00.tar.gz'
+
+=item *
+
+C<<< restart_delay >>> -- number of seconds that must elapse before restarting
 smoke testing. This will reload indices to search for new distributions
 and restart testing from the most recent distribution. Must be a positive
 integer; Defaults to 43200 seconds (12 hours)
-* {set_term_title} -- toggle for whether the terminal titlebar will be
+
+=item *
+
+C<<< set_term_title >>> -- toggle for whether the terminal titlebar will be
 updated with the distribution being smoke tested and the starting time
 of the test. Helps determine if a test is hung and which distribution
 might be responsible.  Valid values are 0 or 1.  Defaults to 1
-* {status_file} -- during testing, the name of the distribution under test
+
+=item *
+
+C<<< status_file >>> -- during testing, the name of the distribution under test
 and a timestamp are written to this file. The file is removed after the
 test is complete.  This helps identify a problem distribution if testing
 hangs or crashes the computer. If the argument includes a path, all
-directories to the file must exist. Defaults to {smoker-status-$$.txt}
-in File::Spec->tmpdir.
-* {install} -- toggle for whether the distribution should be installed
+directories to the file must exist. Defaults to C<<< smoker-status-$$.txt >>>
+in File::Spec-E<gt>tmpdir.
+
+=item *
+
+C<<< install >>> -- toggle for whether the distribution should be installed
 after successful testing. Can be useful to avoid prerequisite re-building
 and growing PERL5LIB for the cost of disk space used for installed
 modules. Valid values are 0 or 1. Defaults to 0
-* {reverse} -- toggle the order in which releases are tested. When set to 1,
+
+=item *
+
+C<<< reverse >>> -- toggle the order in which releases are tested. When set to 1,
 testing starts from the older release not the most recent one (or the last
 distribution if --list is provided). Valid values are 0 or 1. Defaults to 0
-* {force_trust} -- toggle whether to override CPAN's
-{trust_test_report_history} option. When set to 1, {trust_test_report_history}
-is set to 1.  When set to 0, {trust_test_report_history} is left alone and
+
+=item *
+
+C<<< force_trust >>> -- toggle whether to override CPAN's
+C<<< trust_test_report_history >>> option. When set to 1, C<<< trust_test_report_history >>>
+is set to 1.  When set to 0, C<<< trust_test_report_history >>> is left alone and
 whatever the user has configured for their CPAN client is used.
 Valid values are 0 or 1. Defaults to 0
 
-= HINTS
+=back
 
-== Selection of distributions to test
+=head1 HINTS
+
+=head2 Selection of distributions to test
 
 Only the most recently uploaded developer and normal releases will be
 tested, and only if the developer release is newer than the regular release
@@ -609,18 +667,18 @@ tarball.
 Perl, parrot, kurila, Pugs and similar distributions will not be tested.  The
 skip list is based on CPAN::Mini and matches as follows:
 
-    qr{(?:
-          /(?:emb|syb|bio)?perl-\d
-        | /(?:parrot|ponie|kurila|Perl6-Pugs)-\d
-        | /perl-?5\.004
-        | /perl_mlb\.zip
-    )}xi,
+     qr{(?:
+           /(?:emb|syb|bio)?perl-\d
+         | /(?:parrot|ponie|kurila|Perl6-Pugs)-\d
+         | /perl-?5\.004
+         | /perl_mlb\.zip
+     )}xi,
 
 Bundles and mod_perl distributions will also not be tested, though mod_perl is
 likely to be requested as a dependency by many modules.  See the next section
 for how to tell CPAN.pm not to test certain dependencies.
 
-== Skipping additional distributions
+=head2 Skipping additional distributions
 
 If certain distributions hang, crash or otherwise cause trouble, you can use
 CPAN's "distroprefs" system to disable them.  If a distribution is disabled, it
@@ -629,36 +687,36 @@ failing test is just discarded.
 
 The first step is configuring a directory for distroprefs files:
 
-    $ cpan
-    cpan> o conf init prefs_dir
-    cpan> o conf commit
+     $ cpan
+     cpan> o conf init prefs_dir
+     cpan> o conf commit
 
-Next, ensure that either the [YAML] or [YAML::Syck] module is installed.
-(YAML::Syck is faster).  Then create a file in the {prefs_dir} directory
-to hold the list of distributions to disable, e.g. call it {disabled.yml}
+Next, ensure that either the L<YAML> or L<YAML::Syck> module is installed.
+(YAML::Syck is faster).  Then create a file in the C<<< prefs_dir >>> directory
+to hold the list of distributions to disable, e.g. call it C<<< disabled.yml >>>
 
 In that file, you can add blocks of YAML code to disable distributions.  The
 match criteria "distribution" is a regex that matches against the canonical
-name of a distribution, e.g. {AUTHOR/Foo-Bar-3.14.tar.gz}.
+name of a distribution, e.g. C<<< AUTHOR/Foo-Bar-3.14.tar.gz >>>.
 
 Here is a sample file to show you some syntax (don't actually use these,
 though):
 
-    ---
-    comment: "Tests take too long"
-    match:
-        distribution: "^DAGOLDEN/CPAN-Reporter-\d"
-    disabled: 1
-    ---
-    comment: "Skip Win32 distributions"
-    match:
-        distribution: "/Win32"
-    disabled: 1
-    ---
-    comment: "Skip distributions by Andy Lester"
-    match:
-        distribution: "^PETDANCE"
-    disabled: 1
+     ---
+     comment: "Tests take too long"
+     match:
+         distribution: "^DAGOLDEN/CPAN-Reporter-\d"
+     disabled: 1
+     ---
+     comment: "Skip Win32 distributions"
+     match:
+         distribution: "/Win32"
+     disabled: 1
+     ---
+     comment: "Skip distributions by Andy Lester"
+     match:
+         distribution: "^PETDANCE"
+     disabled: 1
 
 Please note that disabling distributions like this will also disable them
 for normal, non-smoke usage of CPAN.pm.
@@ -667,11 +725,11 @@ One distribution that I would recommend either installing up front or else
 disabling with distroprefs is mod_perl, as it is a common requirement for many
 Apache:: modules but does not (easily) build and test under automation.
 
-    ---
-    comment: "Don't build mod_perl if required by some other module"
-    match:
-        distribution: "/mod_perl-\d"
-    disabled: 1
+     ---
+     comment: "Don't build mod_perl if required by some other module"
+     match:
+         distribution: "/mod_perl-\d"
+     disabled: 1
 
 Distroprefs are more powerful than this -- they can be used to automate
 responses to prompts in distributions, set environment variables, specify
@@ -679,24 +737,24 @@ additional dependencies and so on.  Read the docs for CPAN.pm for more and
 look in the "distroprefs" directory in the CPAN distribution tarball for
 examples.
 
-== Using a local CPAN::Mini mirror
+=head2 Using a local CPAN::Mini mirror
 
 Because distributions must be retrieved from a CPAN mirror, the smoker may
 cause heavy network load and will reptitively download common build
 prerequisites.
 
-An alternative is to use [CPAN::Mini] to create a local CPAN mirror and to
-point CPAN's {urllist} to the local mirror.
+An alternative is to use L<CPAN::Mini> to create a local CPAN mirror and to
+point CPAN's C<<< urllist >>> to the local mirror.
 
-    $ cpan
-    cpan> o conf urllist unshift file:///path/to/minicpan
-    cpan> o conf commit
+     $ cpan
+     cpan> o conf urllist unshift file:///path/to/minicpan
+     cpan> o conf commit
 
-However, CPAN::Reporter::Smoker needs the {find-ls.gz} file, which
+However, CPAN::Reporter::Smoker needs the C<<< find-ls.gz >>> file, which
 CPAN::Mini does not mirror by default.  Add it to a .minicpanrc file in your
 home directory to include it in your local CPAN mirror.
 
-    also_mirror: indices/find-ls.gz
+     also_mirror: indices/find-ls.gz
 
 Note that CPAN::Mini does not mirror developer versions.  Therefore, a
 live, network CPAN Mirror will be needed in the urllist to retrieve these.
@@ -705,11 +763,11 @@ Note that CPAN requires the LWP module to be installed to use a local CPAN
 mirror.
 
 Alternatively, you might experiment with the alpha-quality release of
-[CPAN::Mini::Devel], which subclasses CPAN::Mini to retrieve developer
+L<CPAN::Mini::Devel>, which subclasses CPAN::Mini to retrieve developer
 distributions (and find-ls.gz) using the same logic as
 CPAN::Reporter::Smoker.
 
-== Timing out hanging tests
+=head2 Timing out hanging tests
 
 CPAN::Reporter (since 1.08) supports a 'command_timeout' configuration option.
 Set this option in the CPAN::Reporter configuration file to time out tests that
@@ -722,50 +780,50 @@ SIGKILL and could cause system instability or later deadlocks
 
 This option is still considered experimental.
 
-== Avoiding repetitive prerequisite testing
+=head2 Avoiding repetitive prerequisite testing
 
 Because CPAN::Reporter::Smoker satisfies all requirements from scratch, common
 dependencies (e.g. Class::Accessor) will be unpacked, built and tested
 repeatedly.
 
-As of version 1.92_56, CPAN supports the {trust_test_report_history} config
+As of version 1.92_56, CPAN supports the C<<< trust_test_report_history >>> config
 option.  When set, CPAN will check the last test report for a distribution.
 If one is found, the results of that test are used instead of running tests
 again.
 
-    $ cpan
-    cpan> o conf init trust_test_report_history
-    cpan> o conf commit
+     $ cpan
+     cpan> o conf init trust_test_report_history
+     cpan> o conf commit
 
-== Avoiding repetitive prerequisite builds (EXPERIMENTAL)
+=head2 Avoiding repetitive prerequisite builds (EXPERIMENTAL)
 
-CPAN has a {build_dir_reuse} config option.  When set (and if a YAML module is
+CPAN has a C<<< build_dir_reuse >>> config option.  When set (and if a YAML module is
 installed and configured), CPAN will attempt to make build directories
 persistent.  This has the potential to save substantial time and space during
 smoke testing.  CPAN::Reporter::Smoker will recognize if this option is set
 and make adjustments to the test process to keep PERL5LIB from growing
 uncontrollably as the number of persistent directories increases.
 
-*NOTE:* Support for {build_dir_reuse} is highly experimental. Wait for at least
+B<NOTE:> Support for C<<< build_dir_reuse >>> is highly experimental. Wait for at least
 CPAN version 1.92_62 before trying this option.
 
-    $ cpan
-    cpan> o conf init build_dir_reuse
-    cpan> o conf commit
+     $ cpan
+     cpan> o conf init build_dir_reuse
+     cpan> o conf commit
 
-== Stopping early if a prerequisite fails
+=head2 Stopping early if a prerequisite fails
 
 Normally, CPAN.pm continues testing a distribution even if a prequisite fails
 to build or fails testing.  Some distributions may pass their tests even
 without a listed prerequisite, but most just fail (and CPAN::Reporter discards
 failures if prerequisites are not met).
 
-As of version 1.92_57, CPAN supports the {halt_on_failure} config option.
+As of version 1.92_57, CPAN supports the C<<< halt_on_failure >>> config option.
 When set, a prerequisite failure stops further processing.
 
-    $ cpan
-    cpan> o conf init halt_on_failure
-    cpan> o conf commit
+     $ cpan
+     cpan> o conf init halt_on_failure
+     cpan> o conf commit
 
 However, a disadvantage of halting early is that no DISCARD grade is
 recorded in the history.  The next time CPAN::Reporter::Smoker runs, the
@@ -773,106 +831,136 @@ distribution will be tested again from scratch.  It may be better to let all
 prerequisites finish so the distribution can fail its test and be flagged
 with DISCARD so it will be skipped in the future.
 
-== CPAN cache bloat
+=head2 CPAN cache bloat
 
 CPAN will use a lot of scratch space to download, build and test modules.  Use
 CPAN's built-in cache management configuration to let it purge the cache
 periodically if you don't want to do this manually.  When configured, the cache
 will be purged on start and after a certain number of distributions have
-been tested as determined by the {clean_cache_after} option for the
-{start()} function.
+been tested as determined by the C<<< clean_cache_after >>> option for the
+C<<< start() >>> function.
 
-    $ cpan
-    cpan> o conf init build_cache scan_cache
-    cpan> o conf commit
+     $ cpan
+     cpan> o conf init build_cache scan_cache
+     cpan> o conf commit
 
-== CPAN verbosity
+=head2 CPAN verbosity
 
 Recent versions of CPAN are verbose by default, but include some lesser
 known configuration settings to minimize this for untarring distributions and
 for loading support modules.  Setting the verbosity for these to 'none' will
 minimize some of the clutter to the screen as distributions are tested.
 
-    $ cpan
-    cpan> o conf init /verbosity/
-    cpan> o conf commit
+     $ cpan
+     cpan> o conf init /verbosity/
+     cpan> o conf commit
 
-== Saving reports to files instead of sending directly
+=head2 Saving reports to files instead of sending directly
 
 In some cases, such as when smoke testing using a development or prerelease
 toolchain module like Test-Harness, it may be prefereable to save reports to
 files in a directory for review prior to submitting them.  To do this,
-manually set the {transport} option in your CPAN::Reporter config file to use
-the [Test::Reporter::Transport::File] transport.
+manually set the C<<< transport >>> option in your CPAN::Reporter config file to use
+the L<Test::Reporter::Transport::File> transport.
 
-    transport=File /path/to/directory
+     transport=File /path/to/directory
 
 After review, send saved reports using Test::Reporter:
 
-    Test::Reporter->new()->read($filename)->send()
+     Test::Reporter->new()->read($filename)->send()
 
-= ENVIRONMENT
+=head1 ENVIRONMENT
 
 Automatically sets the following environment variables to true values
 while running:
 
-* {AUTOMATED_TESTING} -- signal that tests are being run by an automated
+=over
+
+=item *
+
+C<<< AUTOMATED_TESTING >>> -- signal that tests are being run by an automated
 smoke testing program (i.e. don't expect interactivity)
-* {PERL_MM_USE_DEFAULT} -- accept [ExtUtils::MakeMaker] prompt() defaults
-* {PERL_EXTUTILS_AUTOINSTALL} -- set to '--defaultdeps' for default
+
+=item *
+
+C<<< PERL_MM_USE_DEFAULT >>> -- accept L<ExtUtils::MakeMaker> prompt() defaults
+
+=item *
+
+C<<< PERL_EXTUTILS_AUTOINSTALL >>> -- set to '--defaultdeps' for default
 dependencies
+
+=back
 
 The following environment variables, if set, will modify the behavior of
 CPAN::Reporter::Smoker.  Generally, they are only required during the
 testing of CPAN::Reporter::Smoker
 
-* {PERL_CR_SMOKER_RUNONCE} -- if true, {start()} will exit after all
-distributions are tested instead of sleeping for the {restart_delay}
-and then continuing
-* {PERL_CR_SMOKER_SHORTCUT} -- if true, {start()} will process arguments (if
-any) but will return before starting smoke testing; used for testing argument
-handling by {start()}
+=over
 
-= BUGS
+=item *
+
+C<<< PERL_CR_SMOKER_RUNONCE >>> -- if true, C<<< start() >>> will exit after all
+distributions are tested instead of sleeping for the C<<< restart_delay >>>
+and then continuing
+
+=item *
+
+C<<< PERL_CR_SMOKER_SHORTCUT >>> -- if true, C<<< start() >>> will process arguments (if
+any) but will return before starting smoke testing; used for testing argument
+handling by C<<< start() >>>
+
+=back
+
+=head1 BUGS
 
 Please report any bugs or feature using the CPAN Request Tracker.
 Bugs can be submitted through the web interface at
-[http://rt.cpan.org/Dist/Display.html?Queue=CPAN-Reporter-Smoker]
+L<http://rt.cpan.org/Dist/Display.html?Queue=CPAN-Reporter-Smoker>
 
 When submitting a bug or request, please include a test-file or a patch to an
 existing test-file that illustrates the bug or desired feature.
 
-= SEE ALSO
+=head1 SEE ALSO
 
-* [CPAN]
-* [CPAN::Reporter]
-* [CPAN::Testers]
-* [CPAN::Mini]
-* [CPAN::Mini::Devel]
+=over
 
-= AUTHOR
+=item *
 
-David A. Golden (DAGOLDEN)
+L<CPAN>
 
-= COPYRIGHT AND LICENSE
+=item *
 
-Copyright (c) 2008 by David A. Golden
+L<CPAN::Reporter>
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-[http://www.apache.org/licenses/LICENSE-2.0]
+=item *
 
-Files produced as output though the use of this software, shall not be
-considered Derivative Works, but shall be considered the original work of the
-Licensor.
+L<CPAN::Testers>
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+=item *
 
-=end wikidoc
+L<CPAN::Mini>
+
+=item *
+
+L<CPAN::Mini::Devel>
+
+=back
+
+=head1 AUTHOR
+
+David Golden <dagolden@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2010 by David Golden.
+
+This is free software, licensed under:
+
+  The Apache License, Version 2.0, January 2004
 
 =cut
+
+
+__END__
+

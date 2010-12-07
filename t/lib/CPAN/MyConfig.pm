@@ -1,5 +1,14 @@
+#
+# This file is part of CPAN-Reporter-Smoker
+#
+# This software is Copyright (c) 2010 by David Golden.
+#
+# This is free software, licensed under:
+#
+#   The Apache License, Version 2.0, January 2004
+#
 # MyConfig for CPAN -- adapted from CPAN.pm test files
-use Cwd;
+use Cwd 3.27;
 my $cwd = cwd;
 my $Iswin = $^O eq "MSWin32";
 my $is_disable_test = $ENV{IS_DISABLE_TEST};

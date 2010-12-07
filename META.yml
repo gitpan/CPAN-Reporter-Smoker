@@ -1,16 +1,20 @@
 ---
 abstract: 'Turnkey CPAN Testers smoking'
 author:
-  - 'David A. Golden <dagolden@cpan.org>'
+  - 'David Golden <dagolden@cpan.org>'
 build_requires:
+  CPAN::Checksums: 0
   Cwd: 3.27
+  File::Find: 0
   File::Path: 0
   IO::CaptureOutput: 1.06
   IO::File: 0
   Test::More: 0.62
+  vars: 0
 configure_requires:
-  Module::Build: 0.36
-generated_by: 'Module::Build version 0.3607'
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.102341, CPAN::Meta::Converter version 2.102400'
 license: apache
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -18,12 +22,16 @@ meta-spec:
 name: CPAN-Reporter-Smoker
 no_index:
   directory:
+    - t
+    - xt
     - examples
-    - inc
+    - corpus
+  package:
+    - DB
 provides:
   CPAN::Reporter::Smoker:
     file: lib/CPAN/Reporter/Smoker.pm
-    version: 0.21
+    version: 0.22
 requires:
   CPAN: 1.93
   CPAN::HandleConfig: 0
@@ -31,18 +39,19 @@ requires:
   CPAN::Tarzip: 0
   Carp: 0
   Compress::Zlib: 1.2
+  Config: 0
   Exporter: 0
   ExtUtils::MakeMaker: 6.46
   Fcntl: 0
   File::Basename: 0
   File::Spec: 3.27
-  File::Temp: 0.2
-  Module::Build: 0.3
+  File::Temp: 0.20
+  Module::Build: 0.30
   Probe::Perl: 0.01
   Term::Title: 0.01
-  Test::Reporter: 1.52
+  Test::Reporter: 1.54
   perl: 5.006
 resources:
-  license: http://www.apache.org/licenses/LICENSE-2.0.txt
-  repository: http://dagolden.googlecode.com/svn/
-version: 0.21
+  homepage: http://github.com/dagolden/cpan-reporter-smoker/tree
+  repository: git://github.com/dagolden/cpan-reporter-smoker.git
+version: 0.22

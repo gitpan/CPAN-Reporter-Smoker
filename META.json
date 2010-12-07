@@ -1,0 +1,85 @@
+{
+   "abstract" : "Turnkey CPAN Testers smoking",
+   "author" : [
+      "David Golden <dagolden@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.102341, CPAN::Meta::Converter version 2.102400",
+   "license" : [
+      "apache_2_0"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "CPAN-Reporter-Smoker",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "examples",
+         "corpus"
+      ],
+      "package" : [
+         "DB"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.31"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "CPAN" : "1.93",
+            "CPAN::HandleConfig" : 0,
+            "CPAN::Reporter::History" : "1.1702",
+            "CPAN::Tarzip" : 0,
+            "Carp" : 0,
+            "Compress::Zlib" : "1.2",
+            "Config" : 0,
+            "Exporter" : 0,
+            "ExtUtils::MakeMaker" : "6.46",
+            "Fcntl" : 0,
+            "File::Basename" : 0,
+            "File::Spec" : "3.27",
+            "File::Temp" : "0.20",
+            "Module::Build" : "0.30",
+            "Probe::Perl" : "0.01",
+            "Term::Title" : "0.01",
+            "Test::Reporter" : "1.54",
+            "perl" : "5.006"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "CPAN::Checksums" : 0,
+            "Cwd" : "3.27",
+            "File::Find" : 0,
+            "File::Path" : 0,
+            "IO::CaptureOutput" : "1.06",
+            "IO::File" : 0,
+            "Test::More" : "0.62",
+            "vars" : 0
+         }
+      }
+   },
+   "provides" : {
+      "CPAN::Reporter::Smoker" : {
+         "file" : "lib/CPAN/Reporter/Smoker.pm",
+         "version" : "0.22"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "homepage" : "http://github.com/dagolden/cpan-reporter-smoker/tree",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/dagolden/cpan-reporter-smoker.git",
+         "web" : "http://github.com/dagolden/cpan-reporter-smoker/tree"
+      }
+   },
+   "version" : "0.22"
+}
+

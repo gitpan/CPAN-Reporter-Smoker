@@ -1,6 +1,17 @@
+#
+# This file is part of CPAN-Reporter-Smoker
+#
+# This software is Copyright (c) 2010 by David Golden.
+#
+# This is free software, licensed under:
+#
+#   The Apache License, Version 2.0, January 2004
+#
 # Mock Test::Reporter -- don't actually send anything
 # Adapated from helper test code in CPAN::Reporter
 package Test::Reporter;
+our $VERSION = 1.54;
+
 use Config;
 
 use vars qw/$AUTOLOAD/;
