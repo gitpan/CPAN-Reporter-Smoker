@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.102341, CPAN::Meta::Converter version 2.102400",
+   "generated_by" : "Dist::Zilla version 4.200006, CPAN::Meta::Converter version 2.110930",
    "license" : [
       "apache_2_0"
    ],
@@ -27,7 +27,7 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "6.31"
+            "ExtUtils::MakeMaker" : "6.30"
          }
       },
       "runtime" : {
@@ -68,18 +68,22 @@
    "provides" : {
       "CPAN::Reporter::Smoker" : {
          "file" : "lib/CPAN/Reporter/Smoker.pm",
-         "version" : "0.22"
+         "version" : "0.23"
       }
    },
    "release_status" : "stable",
    "resources" : {
-      "homepage" : "http://github.com/dagolden/cpan-reporter-smoker/tree",
+      "bugtracker" : {
+         "mailto" : "bug-cpan-reporter-smoker at rt.cpan.org",
+         "web" : "http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Reporter-Smoker"
+      },
+      "homepage" : "http://github.com/dagolden/cpan-reporter-smoker",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/dagolden/cpan-reporter-smoker.git",
-         "web" : "http://github.com/dagolden/cpan-reporter-smoker/tree"
+         "url" : "http://github.com/dagolden/cpan-reporter-smoker",
+         "web" : "http://github.com/dagolden/cpan-reporter-smoker"
       }
    },
-   "version" : "0.22"
+   "version" : "0.23"
 }
 

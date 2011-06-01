@@ -1,7 +1,7 @@
 #
 # This file is part of CPAN-Reporter-Smoker
 #
-# This software is Copyright (c) 2010 by David Golden.
+# This software is Copyright (c) 2011 by David Golden.
 #
 # This is free software, licensed under:
 #

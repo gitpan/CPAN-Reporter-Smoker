@@ -1,7 +1,7 @@
 #
 # This file is part of CPAN-Reporter-Smoker
 #
-# This software is Copyright (c) 2010 by David Golden.
+# This software is Copyright (c) 2011 by David Golden.
 #
 # This is free software, licensed under:
 #
@@ -12,7 +12,7 @@ use strict;
 use warnings;
 package CPAN::Reporter::Smoker;
 BEGIN {
-  $CPAN::Reporter::Smoker::VERSION = '0.22';
+  $CPAN::Reporter::Smoker::VERSION = '0.23';
 }
 # ABSTRACT: Turnkey CPAN Testers smoking
 
@@ -250,12 +250,13 @@ sub start {
 #--------------------------------------------------------------------------#
 
 sub _clean_cache {
+  my $phase = $CPAN::Config->{scan_cache};
   # Possibly clean up cache if it exceeds defined size
   if ( $CPAN::META->{cachemgr} ) {
-    $CPAN::META->{cachemgr}->scan_cache();
+    $CPAN::META->{cachemgr}->scan_cache($phase);
   }
   else {
-    $CPAN::META->{cachemgr} = CPAN::CacheMgr->new(); # also scans cache
+    $CPAN::META->{cachemgr} = CPAN::CacheMgr->new($phase); # also scans cache
   }
 }
 
@@ -504,7 +505,7 @@ CPAN::Reporter::Smoker - Turnkey CPAN Testers smoking
 
 =head1 VERSION
 
-version 0.22
+version 0.23
 
 =head1 SYNOPSIS
 
@@ -947,13 +948,32 @@ L<CPAN::Mini::Devel>
 
 =back
 
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+
+=head1 SUPPORT
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests by email to C<bug-cpan-reporter-smoker at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Reporter-Smoker>. You will be automatically notified of any
+progress on the request by the system.
+
+=head2 Source Code
+
+This is open source software.  The code repository is available for
+public review and contribution under the terms of the license.
+
+L<http://github.com/dagolden/cpan-reporter-smoker>
+
+  git clone http://github.com/dagolden/cpan-reporter-smoker
+
 =head1 AUTHOR
 
 David Golden <dagolden@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2010 by David Golden.
+This software is Copyright (c) 2011 by David Golden.
 
 This is free software, licensed under:
 

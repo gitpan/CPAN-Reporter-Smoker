@@ -2,7 +2,7 @@ NAME
     CPAN::Reporter::Smoker - Turnkey CPAN Testers smoking
 
 VERSION
-    version 0.22
+    version 0.23
 
 SYNOPSIS
          $ perl -MCPAN::Reporter::Smoker -e start
@@ -373,11 +373,28 @@ SEE ALSO
 
     *   CPAN::Mini::Devel
 
+SUPPORT
+  Bugs / Feature Requests
+    Please report any bugs or feature requests by email to
+    "bug-cpan-reporter-smoker at rt.cpan.org", or through the web interface
+    at
+    <http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Reporter-Smoker>.
+    You will be automatically notified of any progress on the request by the
+    system.
+
+  Source Code
+    This is open source software. The code repository is available for
+    public review and contribution under the terms of the license.
+
+    <http://github.com/dagolden/cpan-reporter-smoker>
+
+      git clone http://github.com/dagolden/cpan-reporter-smoker
+
 AUTHOR
     David Golden <dagolden@cpan.org>
 
 COPYRIGHT AND LICENSE
-    This software is Copyright (c) 2010 by David Golden.
+    This software is Copyright (c) 2011 by David Golden.
 
     This is free software, licensed under:
 
