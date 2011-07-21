@@ -14,7 +14,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.200006, CPAN::Meta::Converter version 2.110930'
+generated_by: 'Dist::Zilla version 4.200009, CPAN::Meta::Converter version 2.110930'
 license: apache
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -31,7 +31,7 @@ no_index:
 provides:
   CPAN::Reporter::Smoker:
     file: lib/CPAN/Reporter/Smoker.pm
-    version: 0.23
+    version: 0.24
 requires:
   CPAN: 1.93
   CPAN::HandleConfig: 0
@@ -49,10 +49,10 @@ requires:
   Module::Build: 0.30
   Probe::Perl: 0.01
   Term::Title: 0.01
-  Test::Reporter: 1.54
+  Test::Reporter: 1.58
   perl: 5.006
 resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Reporter-Smoker
   homepage: http://github.com/dagolden/cpan-reporter-smoker
   repository: http://github.com/dagolden/cpan-reporter-smoker
-version: 0.23
+version: 0.24

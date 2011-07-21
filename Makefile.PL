@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-BEGIN { require 5.006; }
+use 5.006;
 
 use ExtUtils::MakeMaker 6.30;
 
@@ -45,9 +45,9 @@ my %WriteMakefileArgs = (
     'Module::Build' => '0.30',
     'Probe::Perl' => '0.01',
     'Term::Title' => '0.01',
-    'Test::Reporter' => '1.54'
+    'Test::Reporter' => '1.58'
   },
-  'VERSION' => '0.23',
+  'VERSION' => '0.24',
   'test' => {
     'TESTS' => 't/*.t'
   }

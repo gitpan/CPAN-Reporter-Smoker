@@ -5,6 +5,7 @@ MANIFEST.SKIP
 META.json
 META.yml
 Makefile.PL
+README.PATCHING
 Todo
 dist.ini
 lib/CPAN/Reporter/Smoker.pm
@@ -42,3 +43,4 @@ t/smoke-reverse.t
 xt/release/distmeta.t
 xt/release/pod-coverage.t
 xt/release/pod-syntax.t
+xt/release/test-version.t

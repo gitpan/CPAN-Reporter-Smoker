@@ -2,7 +2,7 @@ NAME
     CPAN::Reporter::Smoker - Turnkey CPAN Testers smoking
 
 VERSION
-    version 0.23
+    version 0.24
 
 SYNOPSIS
          $ perl -MCPAN::Reporter::Smoker -e start

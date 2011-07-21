@@ -1,20 +1,8 @@
-#
-# This file is part of CPAN-Reporter-Smoker
-#
-# This software is Copyright (c) 2011 by David Golden.
-#
-# This is free software, licensed under:
-#
-#   The Apache License, Version 2.0, January 2004
-#
 use 5.006;
 use strict;
 use warnings;
 package CPAN::Reporter::Smoker;
-BEGIN {
-  $CPAN::Reporter::Smoker::VERSION = '0.23';
-}
-# ABSTRACT: Turnkey CPAN Testers smoking
+our $VERSION = '0.24'; # VERSION
 
 use Carp;
 use Config;
@@ -493,7 +481,9 @@ sub _parse_module_index {
     return [ sort { $mirror{$b} <=> $mirror{$a} } keys %mirror ];
 }
 
-1; #modules must return true
+1;
+
+# ABSTRACT: Turnkey CPAN Testers smoking
 
 
 
@@ -505,7 +495,7 @@ CPAN::Reporter::Smoker - Turnkey CPAN Testers smoking
 
 =head1 VERSION
 
-version 0.23
+version 0.24
 
 =head1 SYNOPSIS
 

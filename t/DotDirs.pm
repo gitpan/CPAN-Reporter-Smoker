@@ -1,12 +1,3 @@
-#
-# This file is part of CPAN-Reporter-Smoker
-#
-# This software is Copyright (c) 2011 by David Golden.
-#
-# This is free software, licensed under:
-#
-#   The Apache License, Version 2.0, January 2004
-#
 package t::DotDirs;
 
 # stolen/adapted from local_utils.pm in the CPAN.pm distro
@@ -58,3 +49,4 @@ __DATA__
 email_from = johndoe@example.com
 command_timeout = 30
 send_duplicates = yes
+transport = Null
