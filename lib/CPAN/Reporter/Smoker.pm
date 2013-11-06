@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Reporter::Smoker;
-our $VERSION = '0.24'; # VERSION
+our $VERSION = '0.25'; # VERSION
 
 use Carp;
 use Config;
@@ -67,6 +67,14 @@ my %spec = (
     default => 0,
     is_valid => sub { /^[01]$/ },
   },
+  'reload_history_period' => {
+    default => 30*60,
+    is_valid => sub { /^\d+$/ },
+  },
+  filter => {
+    default => undef,
+    is_valid => sub { !defined $_ || ref $_ eq 'SUB' }
+  },
 );
 
 sub start {
@@ -113,6 +121,7 @@ sub start {
 
   # global cache of distros smoked to speed skips on restart
   my %seen = map { $_->{dist} => 1 } CPAN::Reporter::History::have_tested();
+  my $history_loaded_at = time;
 
   SCAN_LOOP:
   while ( 1 ) {
@@ -179,6 +188,11 @@ sub start {
           "Smoker: already tested $base [$count]\n");
         next DIST;
       }
+      elsif ( $args{filter} and $args{filter}->($dist) ) {
+        $CPAN::Frontend->mywarn(
+          "Smoker: dist skipped $base [$count]\n");
+        next DIST;
+      }
       elsif ( CPAN::Distribution->new(%{$dist})->prefs->{disabled} ) {
         $CPAN::Frontend->mywarn(
           "Smoker: dist disabled $base [$count]\n");
@@ -215,6 +229,12 @@ sub start {
         _clean_cache();
         $dists_tested = 0;
       }
+      if (time - $history_loaded_at > $args{reload_history_period}) { #_reload_history
+        %seen = map { $_->{dist} => 1 } CPAN::Reporter::History::have_tested();
+        $history_loaded_at = time;
+        $CPAN::Frontend->mywarn( "List of distros smoked updated\n");
+      }
+
       next SCAN_LOOP if time - $loop_start_time > $args{restart_delay};
     }
     last SCAN_LOOP if $ENV{PERL_CR_SMOKER_RUNONCE};
@@ -485,9 +505,11 @@ sub _parse_module_index {
 
 # ABSTRACT: Turnkey CPAN Testers smoking
 
-
+__END__
 
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -495,7 +517,7 @@ CPAN::Reporter::Smoker - Turnkey CPAN Testers smoking
 
 =head1 VERSION
 
-version 0.24
+version 0.25
 
 =head1 SYNOPSIS
 
@@ -630,6 +652,12 @@ is set to 1.  When set to 0, C<<< trust_test_report_history >>> is left alone an
 whatever the user has configured for their CPAN client is used.
 Valid values are 0 or 1. Defaults to 0
 
+=item *
+
+C<<< reload_history_period >>> -- after this period in seconds, history of modules
+smoked will be reloaded when possible.
+Default value 1800 seconds (30 minutes).
+
 =back
 
 =head1 HINTS
@@ -731,7 +759,7 @@ examples.
 =head2 Using a local CPAN::Mini mirror
 
 Because distributions must be retrieved from a CPAN mirror, the smoker may
-cause heavy network load and will reptitively download common build
+cause heavy network load and will repetitively download common build
 prerequisites.
 
 An alternative is to use L<CPAN::Mini> to create a local CPAN mirror and to
@@ -804,7 +832,7 @@ CPAN version 1.92_62 before trying this option.
 
 =head2 Stopping early if a prerequisite fails
 
-Normally, CPAN.pm continues testing a distribution even if a prequisite fails
+Normally, CPAN.pm continues testing a distribution even if a prerequisite fails
 to build or fails testing.  Some distributions may pass their tests even
 without a listed prerequisite, but most just fail (and CPAN::Reporter discards
 failures if prerequisites are not met).
@@ -849,7 +877,7 @@ minimize some of the clutter to the screen as distributions are tested.
 =head2 Saving reports to files instead of sending directly
 
 In some cases, such as when smoke testing using a development or prerelease
-toolchain module like Test-Harness, it may be prefereable to save reports to
+toolchain module like Test-Harness, it may be preferable to save reports to
 files in a directory for review prior to submitting them.  To do this,
 manually set the C<<< transport >>> option in your CPAN::Reporter config file to use
 the L<Test::Reporter::Transport::File> transport.
@@ -938,39 +966,49 @@ L<CPAN::Mini::Devel>
 
 =back
 
-=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
 
 =head1 SUPPORT
 
 =head2 Bugs / Feature Requests
 
-Please report any bugs or feature requests by email to C<bug-cpan-reporter-smoker at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Reporter-Smoker>. You will be automatically notified of any
-progress on the request by the system.
+Please report any bugs or feature requests through the issue tracker
+at L<https://github.com/cpan-testers/CPAN-Reporter-Smoker/issues>.
+You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
 
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<http://github.com/dagolden/cpan-reporter-smoker>
+L<https://github.com/cpan-testers/CPAN-Reporter-Smoker>
 
-  git clone http://github.com/dagolden/cpan-reporter-smoker
+  git clone https://github.com/cpan-testers/CPAN-Reporter-Smoker.git
 
 =head1 AUTHOR
 
 David Golden <dagolden@cpan.org>
 
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Alexandr Ciornii <alexchorny@gmail.com>
+
+=item *
+
+Christian Walde <walde.christian@googlemail.com>
+
+=back
+
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2011 by David Golden.
+This software is Copyright (c) 2013 by David Golden.
 
 This is free software, licensed under:
 
   The Apache License, Version 2.0, January 2004
 
 =cut
-
-
-__END__
-

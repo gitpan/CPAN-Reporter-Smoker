@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.200009, CPAN::Meta::Converter version 2.110930",
+   "generated_by" : "Dist::Zilla version 5.006, CPAN::Meta::Converter version 2.132830",
    "license" : [
       "apache_2_0"
    ],
@@ -27,63 +27,93 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "6.30"
+            "ExtUtils::MakeMaker" : "6.17"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Dist::Zilla" : "5.006",
+            "Dist::Zilla::Plugin::Encoding" : "0",
+            "Dist::Zilla::Plugin::Prereqs" : "0",
+            "Dist::Zilla::Plugin::RemovePrereqs" : "0",
+            "Dist::Zilla::PluginBundle::DAGOLDEN" : "0.056",
+            "File::Spec" : "0",
+            "File::Temp" : "0",
+            "IO::Handle" : "0",
+            "IPC::Open3" : "0",
+            "Pod::Coverage::TrustPod" : "0",
+            "Test::CPAN::Meta" : "0",
+            "Test::More" : "0",
+            "Test::Pod" : "1.41",
+            "Test::Pod::Coverage" : "1.08"
          }
       },
       "runtime" : {
          "requires" : {
             "CPAN" : "1.93",
-            "CPAN::HandleConfig" : 0,
+            "CPAN::HandleConfig" : "0",
             "CPAN::Reporter::History" : "1.1702",
-            "CPAN::Tarzip" : 0,
-            "Carp" : 0,
+            "CPAN::Tarzip" : "0",
+            "Carp" : "0",
             "Compress::Zlib" : "1.2",
-            "Config" : 0,
-            "Exporter" : 0,
+            "Exporter" : "0",
             "ExtUtils::MakeMaker" : "6.46",
-            "Fcntl" : 0,
-            "File::Basename" : 0,
+            "Fcntl" : "0",
+            "File::Basename" : "0",
             "File::Spec" : "3.27",
             "File::Temp" : "0.20",
             "Module::Build" : "0.30",
             "Probe::Perl" : "0.01",
             "Term::Title" : "0.01",
             "Test::Reporter" : "1.58",
-            "perl" : "5.006"
+            "perl" : "5.006",
+            "strict" : "0",
+            "warnings" : "0"
          }
       },
       "test" : {
+         "recommends" : {
+            "CPAN::Meta" : "0",
+            "CPAN::Meta::Requirements" : "0"
+         },
          "requires" : {
-            "CPAN::Checksums" : 0,
+            "CPAN::Checksums" : "0",
             "Cwd" : "3.27",
-            "File::Find" : 0,
-            "File::Path" : 0,
+            "ExtUtils::MakeMaker" : "6.46",
+            "File::Find" : "0",
+            "File::Path" : "0",
+            "File::Spec::Functions" : "0",
             "IO::CaptureOutput" : "1.06",
-            "IO::File" : 0,
+            "IO::File" : "0",
+            "List::Util" : "0",
             "Test::More" : "0.62",
-            "vars" : 0
+            "vars" : "0"
          }
       }
    },
    "provides" : {
       "CPAN::Reporter::Smoker" : {
          "file" : "lib/CPAN/Reporter/Smoker.pm",
-         "version" : "0.24"
+         "version" : "0.25"
       }
    },
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "mailto" : "bug-cpan-reporter-smoker at rt.cpan.org",
-         "web" : "http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Reporter-Smoker"
+         "web" : "https://github.com/cpan-testers/CPAN-Reporter-Smoker/issues"
       },
-      "homepage" : "http://github.com/dagolden/cpan-reporter-smoker",
+      "homepage" : "https://github.com/cpan-testers/CPAN-Reporter-Smoker",
       "repository" : {
          "type" : "git",
-         "url" : "http://github.com/dagolden/cpan-reporter-smoker",
-         "web" : "http://github.com/dagolden/cpan-reporter-smoker"
+         "url" : "https://github.com/cpan-testers/CPAN-Reporter-Smoker.git",
+         "web" : "https://github.com/cpan-testers/CPAN-Reporter-Smoker"
       }
    },
-   "version" : "0.24"
+   "version" : "0.25",
+   "x_authority" : "cpan:DAGOLDEN",
+   "x_contributors" : [
+      "Alexandr Ciornii <alexchorny@gmail.com>",
+      "Christian Walde <walde.christian@googlemail.com>"
+   ]
 }
 

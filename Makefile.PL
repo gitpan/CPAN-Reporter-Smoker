@@ -4,67 +4,97 @@ use warnings;
 
 use 5.006;
 
-use ExtUtils::MakeMaker 6.30;
+use ExtUtils::MakeMaker 6.17;
 
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Turnkey CPAN Testers smoking',
-  'AUTHOR' => 'David Golden <dagolden@cpan.org>',
-  'BUILD_REQUIRES' => {
-    'CPAN::Checksums' => '0',
-    'Cwd' => '3.27',
-    'File::Find' => '0',
-    'File::Path' => '0',
-    'IO::CaptureOutput' => '1.06',
-    'IO::File' => '0',
-    'Test::More' => '0.62',
-    'vars' => '0'
+  "ABSTRACT" => "Turnkey CPAN Testers smoking",
+  "AUTHOR" => "David Golden <dagolden\@cpan.org>",
+  "BUILD_REQUIRES" => {},
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.17"
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.30'
+  "DISTNAME" => "CPAN-Reporter-Smoker",
+  "EXE_FILES" => [],
+  "LICENSE" => "apache",
+  "NAME" => "CPAN::Reporter::Smoker",
+  "PREREQ_PM" => {
+    "CPAN" => "1.93",
+    "CPAN::HandleConfig" => 0,
+    "CPAN::Reporter::History" => "1.1702",
+    "CPAN::Tarzip" => 0,
+    "Carp" => 0,
+    "Compress::Zlib" => "1.2",
+    "Exporter" => 0,
+    "ExtUtils::MakeMaker" => "6.46",
+    "Fcntl" => 0,
+    "File::Basename" => 0,
+    "File::Spec" => "3.27",
+    "File::Temp" => "0.20",
+    "Module::Build" => "0.30",
+    "Probe::Perl" => "0.01",
+    "Term::Title" => "0.01",
+    "Test::Reporter" => "1.58",
+    "strict" => 0,
+    "warnings" => 0
   },
-  'DISTNAME' => 'CPAN-Reporter-Smoker',
-  'EXE_FILES' => [],
-  'LICENSE' => 'apache',
-  'NAME' => 'CPAN::Reporter::Smoker',
-  'PREREQ_PM' => {
-    'CPAN' => '1.93',
-    'CPAN::HandleConfig' => '0',
-    'CPAN::Reporter::History' => '1.1702',
-    'CPAN::Tarzip' => '0',
-    'Carp' => '0',
-    'Compress::Zlib' => '1.2',
-    'Config' => '0',
-    'Exporter' => '0',
-    'ExtUtils::MakeMaker' => '6.46',
-    'Fcntl' => '0',
-    'File::Basename' => '0',
-    'File::Spec' => '3.27',
-    'File::Temp' => '0.20',
-    'Module::Build' => '0.30',
-    'Probe::Perl' => '0.01',
-    'Term::Title' => '0.01',
-    'Test::Reporter' => '1.58'
+  "TEST_REQUIRES" => {
+    "CPAN::Checksums" => 0,
+    "Cwd" => "3.27",
+    "ExtUtils::MakeMaker" => "6.46",
+    "File::Find" => 0,
+    "File::Path" => 0,
+    "File::Spec::Functions" => 0,
+    "IO::CaptureOutput" => "1.06",
+    "IO::File" => 0,
+    "List::Util" => 0,
+    "Test::More" => "0.62",
+    "vars" => 0
   },
-  'VERSION' => '0.24',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "0.25",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 
 
-unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
-  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
-  my $pp = $WriteMakefileArgs{PREREQ_PM};
-  for my $mod ( keys %$br ) {
-    if ( exists $pp->{$mod} ) {
-      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
-    }
-    else {
-      $pp->{$mod} = $br->{$mod};
-    }
-  }
+my %FallbackPrereqs = (
+  "CPAN" => "1.93",
+  "CPAN::Checksums" => 0,
+  "CPAN::HandleConfig" => 0,
+  "CPAN::Reporter::History" => "1.1702",
+  "CPAN::Tarzip" => 0,
+  "Carp" => 0,
+  "Compress::Zlib" => "1.2",
+  "Cwd" => "3.27",
+  "Exporter" => 0,
+  "ExtUtils::MakeMaker" => "6.46",
+  "Fcntl" => 0,
+  "File::Basename" => 0,
+  "File::Find" => 0,
+  "File::Path" => 0,
+  "File::Spec" => "3.27",
+  "File::Spec::Functions" => 0,
+  "File::Temp" => "0.20",
+  "IO::CaptureOutput" => "1.06",
+  "IO::File" => 0,
+  "List::Util" => 0,
+  "Module::Build" => "0.30",
+  "Probe::Perl" => "0.01",
+  "Term::Title" => "0.01",
+  "Test::More" => "0.62",
+  "Test::Reporter" => "1.58",
+  "strict" => 0,
+  "vars" => 0,
+  "warnings" => 0
+);
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
+  delete $WriteMakefileArgs{TEST_REQUIRES};
+  delete $WriteMakefileArgs{BUILD_REQUIRES};
+  $WriteMakefileArgs{PREREQ_PM} = \%FallbackPrereqs;
 }
 
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}

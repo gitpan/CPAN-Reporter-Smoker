@@ -5,16 +5,19 @@ author:
 build_requires:
   CPAN::Checksums: 0
   Cwd: 3.27
+  ExtUtils::MakeMaker: 6.46
   File::Find: 0
   File::Path: 0
+  File::Spec::Functions: 0
   IO::CaptureOutput: 1.06
   IO::File: 0
+  List::Util: 0
   Test::More: 0.62
   vars: 0
 configure_requires:
-  ExtUtils::MakeMaker: 6.30
+  ExtUtils::MakeMaker: 6.17
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.200009, CPAN::Meta::Converter version 2.110930'
+generated_by: 'Dist::Zilla version 5.006, CPAN::Meta::Converter version 2.132830'
 license: apache
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -31,7 +34,7 @@ no_index:
 provides:
   CPAN::Reporter::Smoker:
     file: lib/CPAN/Reporter/Smoker.pm
-    version: 0.24
+    version: 0.25
 requires:
   CPAN: 1.93
   CPAN::HandleConfig: 0
@@ -39,7 +42,6 @@ requires:
   CPAN::Tarzip: 0
   Carp: 0
   Compress::Zlib: 1.2
-  Config: 0
   Exporter: 0
   ExtUtils::MakeMaker: 6.46
   Fcntl: 0
@@ -51,8 +53,14 @@ requires:
   Term::Title: 0.01
   Test::Reporter: 1.58
   perl: 5.006
+  strict: 0
+  warnings: 0
 resources:
-  bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Reporter-Smoker
-  homepage: http://github.com/dagolden/cpan-reporter-smoker
-  repository: http://github.com/dagolden/cpan-reporter-smoker
-version: 0.24
+  bugtracker: https://github.com/cpan-testers/CPAN-Reporter-Smoker/issues
+  homepage: https://github.com/cpan-testers/CPAN-Reporter-Smoker
+  repository: https://github.com/cpan-testers/CPAN-Reporter-Smoker.git
+version: 0.25
+x_authority: cpan:DAGOLDEN
+x_contributors:
+  - 'Alexandr Ciornii <alexchorny@gmail.com>'
+  - 'Christian Walde <walde.christian@googlemail.com>'
