@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Reporter::Smoker;
-our $VERSION = '0.25'; # VERSION
+our $VERSION = '0.26'; # VERSION
 
 use Carp;
 use Config;
@@ -74,6 +74,10 @@ my %spec = (
   filter => {
     default => undef,
     is_valid => sub { !defined $_ || ref $_ eq 'SUB' }
+  },
+  skip_dev_versions => {
+    default => 0,
+    is_valid => sub { /^[01]$/ },
   },
 );
 
@@ -149,7 +153,7 @@ sub start {
       CPAN::Index->reload;
       $CPAN::Frontend->mywarn( "Smoker: scanning and sorting index\n");
 
-      $dists = _parse_module_index( $package, $find_ls );
+      $dists = _parse_module_index( $package, $find_ls, $args{skip_dev_versions} );
 
       $CPAN::Frontend->mywarn( "Smoker: found " . scalar @$dists . " distributions on CPAN\n");
     }
@@ -381,7 +385,7 @@ sub _base_name {
 #--------------------------------------------------------------------------#-
 
 sub _parse_module_index {
-    my ( $packages, $file_ls ) = @_;
+    my ( $packages, $file_ls, $skip_dev_versions ) = @_;
 
     # first walk the packages list
     # and build an index
@@ -470,6 +474,8 @@ sub _parse_module_index {
             # skip unless there's a matching base from the packages file
             next unless $latest{$base_name};
 
+            next if $skip_dev_versions;
+
             # keep only the latest
             $latest_dev{$base_name} ||= { datetime => 0 };
             if ( $stat{datetime} > $latest_dev{$base_name}{datetime} ) {
@@ -517,7 +523,7 @@ CPAN::Reporter::Smoker - Turnkey CPAN Testers smoking
 
 =head1 VERSION
 
-version 0.25
+version 0.26
 
 =head1 SYNOPSIS
 
@@ -614,6 +620,11 @@ C<<< restart_delay >>> -- number of seconds that must elapse before restarting
 smoke testing. This will reload indices to search for new distributions
 and restart testing from the most recent distribution. Must be a positive
 integer; Defaults to 43200 seconds (12 hours)
+
+=item *
+
+C<<< skip_dev_versions >>> -- if true, unindexed distributions will not be tested.
+Valid values are 0 or 1. Defaults to 0.
 
 =item *
 
@@ -1005,7 +1016,7 @@ Christian Walde <walde.christian@googlemail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2013 by David Golden.
+This software is Copyright (c) 2014 by David Golden.
 
 This is free software, licensed under:
 

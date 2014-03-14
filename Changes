@@ -1,5 +1,11 @@
 Revision history for Perl module CPAN::Reporter::Smoker
 
+0.26      2014-03-14 15:52:43+01:00 Europe/Paris
+
+    [ADDED]
+
+    - New option 'skip_dev_versions' to work on minicpans (CHORNY)
+
 0.25      2013-11-06 10:06:15 America/New_York
 
     - Add reloading history of modules smoked (CHORNY)

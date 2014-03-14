@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.006, CPAN::Meta::Converter version 2.132830",
+   "generated_by" : "Dist::Zilla version 5.013, CPAN::Meta::Converter version 2.140640",
    "license" : [
       "apache_2_0"
    ],
@@ -32,11 +32,11 @@
       },
       "develop" : {
          "requires" : {
-            "Dist::Zilla" : "5.006",
+            "Dist::Zilla" : "5.013",
             "Dist::Zilla::Plugin::Encoding" : "0",
             "Dist::Zilla::Plugin::Prereqs" : "0",
             "Dist::Zilla::Plugin::RemovePrereqs" : "0",
-            "Dist::Zilla::PluginBundle::DAGOLDEN" : "0.056",
+            "Dist::Zilla::PluginBundle::DAGOLDEN" : "0.060",
             "File::Spec" : "0",
             "File::Temp" : "0",
             "IO::Handle" : "0",
@@ -74,7 +74,7 @@
       "test" : {
          "recommends" : {
             "CPAN::Meta" : "0",
-            "CPAN::Meta::Requirements" : "0"
+            "CPAN::Meta::Requirements" : "2.120900"
          },
          "requires" : {
             "CPAN::Checksums" : "0",
@@ -87,14 +87,15 @@
             "IO::File" : "0",
             "List::Util" : "0",
             "Test::More" : "0.62",
-            "vars" : "0"
+            "vars" : "0",
+            "version" : "0"
          }
       }
    },
    "provides" : {
       "CPAN::Reporter::Smoker" : {
          "file" : "lib/CPAN/Reporter/Smoker.pm",
-         "version" : "0.25"
+         "version" : "0.26"
       }
    },
    "release_status" : "stable",
@@ -109,7 +110,7 @@
          "web" : "https://github.com/cpan-testers/CPAN-Reporter-Smoker"
       }
    },
-   "version" : "0.25",
+   "version" : "0.26",
    "x_authority" : "cpan:DAGOLDEN",
    "x_contributors" : [
       "Alexandr Ciornii <alexchorny@gmail.com>",
